@@ -94,7 +94,8 @@ public class CassetteTape : MonoBehaviour
         {
             // When the cassette tape is dragged on to the recorder the cassette gets passed as the current tape
             var recorder = other.gameObject.GetComponent<RecorderController>();
-            recorder.currentTape = this;
+            recorder.InsertTape(this);
+            recorder.OnPlay();
         }
     }
 }

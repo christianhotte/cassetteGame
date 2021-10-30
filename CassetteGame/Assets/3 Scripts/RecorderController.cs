@@ -16,8 +16,7 @@ public class RecorderController : MonoBehaviour
 
     #region Objects & Components
 
-    public CassetteTape currentTape;
-
+    private CassetteTape currentTape;
     private AudioSource audioSource;
 
     #endregion
@@ -30,7 +29,8 @@ public class RecorderController : MonoBehaviour
 
     #region Memory Vars
 
-
+    private bool paused = false;
+    private int pitchIndex;
 
     #endregion
 
@@ -52,30 +52,70 @@ public class RecorderController : MonoBehaviour
     }
     public void OnPlay()
     {
-        // checks to make sure audio is not already playing then gets the audio file from the current tape
-        if (!audioSource.isPlaying)
+        // if statements are an attempt to cover edge causes were the buttons are not pressed in the right order which causes things to break.
+        if (audioSource.isPlaying)
         {
-            audioSource.PlayOneShot(currentTape.AudioFile);
+            return;
         }
+        
+        if (audioSource.clip == null)
+        {
+            audioSource.clip = currentTape.AudioFile;
+        }
+
+
+        if (paused)
+        {
+            audioSource.UnPause();
+            paused = false;
+            return;
+        }
+
+        audioSource.pitch = 1;
+        audioSource.Play();
 
     }
     public void OnRewind()
     {
-
+        CyclePitch(-1, 1);
     }
     public void OnFastForward()
     {
-
+        CyclePitch(2, 1);
     }
+
     public void OnStopEject()
     {
-
+        audioSource.Stop();
+        audioSource.clip = null;
+        currentTape = null;
     }
     public void OnPause()
     {
-
+        if (audioSource.isPlaying)
+        {
+            audioSource.Pause();
+            paused = true;
+        }
+        
     }
 
     #endregion
 
+    public void InsertTape(CassetteTape tape)
+    {
+        currentTape = tape;
+    }
+
+    private void CyclePitch(int pitch1, int pitch2)
+    {
+        // Cycles between the passed in pitches each time the method gets called
+        int[] speeds = new[] { pitch1, pitch2 };
+        audioSource.pitch = speeds[pitchIndex];
+        pitchIndex += 1;
+        if (pitchIndex > speeds.Length - 1)
+        {
+            pitchIndex = 0;
+        }
+    }
 }
