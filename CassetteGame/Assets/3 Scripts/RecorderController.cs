@@ -17,7 +17,9 @@ public class RecorderController : MonoBehaviour
     #region Objects & Components
 
     private CassetteTape currentTape;
-    private AudioSource audioSource;
+
+    // Due to the audio system being not the best I need two audio sources or else things break easily. 0 = normal audio clips, 1 = OneShot sound effects.
+    private AudioSource[] audioSources;
 
     #endregion
 
@@ -32,13 +34,15 @@ public class RecorderController : MonoBehaviour
     private bool paused = false;
     private int pitchIndex;
 
+    [SerializeField] private List<AudioClip> miscSounds = new List<AudioClip>();
+
     #endregion
 
     #region RUNTIME METHODS
 
     private void Awake()
     {
-        audioSource = GetComponent<AudioSource>();
+        audioSources = GetComponents<AudioSource>();
     }
 
 
@@ -48,56 +52,65 @@ public class RecorderController : MonoBehaviour
 
     public void OnRecord()
     {
-
+        audioSources[1].PlayOneShot(miscSounds[2]);
     }
     public void OnPlay()
     {
+        // order matters, if this line is placed at the end of the function then the sound does not play 
+        audioSources[1].PlayOneShot(miscSounds[2]);
+
         // if statements are an attempt to cover edge causes were the buttons are not pressed in the right order which causes things to break.
-        if (audioSource.isPlaying)
+        if (audioSources[0].isPlaying || currentTape == null)
         {
             return;
         }
         
-        if (audioSource.clip == null)
+        if (audioSources[0].clip == null)
         {
-            audioSource.clip = currentTape.AudioFile;
+            audioSources[0].clip = currentTape.AudioFile;
         }
 
 
         if (paused)
         {
-            audioSource.UnPause();
+            audioSources[0].UnPause();
             paused = false;
             return;
         }
-
-        audioSource.pitch = 1;
-        audioSource.Play();
+        
+        audioSources[0].pitch = 1;
+        audioSources[0].Play();
 
     }
     public void OnRewind()
     {
+        audioSources[1].PlayOneShot(miscSounds[2]);
         CyclePitch(-1, 1);
     }
     public void OnFastForward()
     {
+        audioSources[1].PlayOneShot(miscSounds[2]);
         CyclePitch(2, 1);
     }
 
     public void OnStopEject()
     {
-        audioSource.Stop();
-        audioSource.clip = null;
+        audioSources[0].Stop();
+        audioSources[0].clip = null;
         currentTape = null;
+        audioSources[1].PlayOneShot(miscSounds[1]);
     }
     public void OnPause()
     {
-        if (audioSource.isPlaying)
+        audioSources[1].PlayOneShot(miscSounds[2]);
+        if (audioSources[0].isPlaying)
         {
-            audioSource.Pause();
+            audioSources[0].Pause();
             paused = true;
+
         }
-        
+
+
     }
 
     #endregion
@@ -105,13 +118,14 @@ public class RecorderController : MonoBehaviour
     public void InsertTape(CassetteTape tape)
     {
         currentTape = tape;
+        audioSources[1].PlayOneShot(miscSounds[0]);
     }
 
     private void CyclePitch(int pitch1, int pitch2)
     {
         // Cycles between the passed in pitches each time the method gets called
         int[] speeds = new[] { pitch1, pitch2 };
-        audioSource.pitch = speeds[pitchIndex];
+        audioSources[0].pitch = speeds[pitchIndex];
         pitchIndex += 1;
         if (pitchIndex > speeds.Length - 1)
         {
