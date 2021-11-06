@@ -65,6 +65,7 @@ public class RecorderController : MonoBehaviour
     public void OnRecord()
     {
         audioSources[1].PlayOneShot(miscSounds[2]);
+        GameManager.Instance.AddGuess(currentTape);
     }
     public void OnPlay()
     {
