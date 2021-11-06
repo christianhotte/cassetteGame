@@ -25,7 +25,10 @@ public class RecorderController : MonoBehaviour
 
     #region Settings
 
-
+    [Header("Recorder Lerp")]
+    [SerializeField] private Vector2 lerpPos;
+    [Range(0.0f, 1.0f)]
+    [SerializeField] private float lerpSmoothness;
 
     #endregion
 
@@ -33,6 +36,9 @@ public class RecorderController : MonoBehaviour
 
     private bool paused = false;
     private int pitchIndex;
+
+    private Vector3 recorderPos;
+    private bool mouseOver;
 
     [SerializeField] private List<AudioClip> miscSounds = new List<AudioClip>();
 
@@ -43,8 +49,14 @@ public class RecorderController : MonoBehaviour
     private void Awake()
     {
         audioSources = GetComponents<AudioSource>();
+        recorderPos = transform.position;
     }
 
+
+    private void Update()
+    {
+        ////RecorderLerp();
+    }
 
     #endregion
 
@@ -117,8 +129,12 @@ public class RecorderController : MonoBehaviour
 
     public void InsertTape(CassetteTape tape)
     {
-        currentTape = tape;
-        audioSources[1].PlayOneShot(miscSounds[0]);
+        if (currentTape == null)
+        {
+            currentTape = tape;
+            audioSources[1].PlayOneShot(miscSounds[0]);
+        }
+        
     }
 
     private void CyclePitch(int pitch1, int pitch2)
@@ -132,4 +148,24 @@ public class RecorderController : MonoBehaviour
             pitchIndex = 0;
         }
     }
+
+    ////private void RecorderLerp()
+    ////{
+    ////    if (mouseOver)
+    ////    {
+    ////        var yPos = recorderPos;
+    ////        yPos = Vector2.MoveTowards(recorderPos, this.lerpPos, this.lerpSmoothness);
+    ////        transform.position = yPos;
+    ////    }
+    ////}
+
+    ////private void OnMouseOver()
+    ////{
+    ////    mouseOver = true;
+    ////}
+
+    ////private void OnMouseExit()
+    ////{
+    ////    mouseOver = false;
+    ////}
 }
