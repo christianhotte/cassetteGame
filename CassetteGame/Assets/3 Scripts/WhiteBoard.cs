@@ -8,6 +8,7 @@ public class WhiteBoard : MonoBehaviour
     private LineRenderer drawLine;
     private List<Vector3> linePoints;
     private float timer;
+    private Transform lineContainer;
 
     private GameObject newline;
     [SerializeField] private float timerDelay;
@@ -15,25 +16,32 @@ public class WhiteBoard : MonoBehaviour
     [SerializeField] private float lineWidth;
 
     private bool hitWhiteboard;
+    private bool endLine;
+    private Vector3 linesOffset;
 
     private void Awake()
     {
         linePoints = new List<Vector3>();
+        lineContainer = transform.parent.Find("Lines");
+        linesOffset = transform.position - lineContainer.position;
     }
 
     private void Update()
     {
+        lineContainer.position = transform.position + linesOffset;
 
         if (Input.GetMouseButtonDown(0))
         {
             // Initialization for when a new line is created 
             newline = new GameObject();
+            newline.transform.parent = lineContainer;
             drawLine = newline.AddComponent<LineRenderer>();
             drawLine.material = new Material(Shader.Find("Sprites/Default"));
             drawLine.startColor = Color.red;
             drawLine.endColor = Color.red;
             drawLine.startWidth = lineWidth;
             drawLine.endWidth = lineWidth;
+            drawLine.useWorldSpace = false;
         }
 
 
@@ -46,16 +54,21 @@ public class WhiteBoard : MonoBehaviour
             if (timer <= 0)
             {
                 // Trying to only activate drawing ability when ray hits whiteboard. But Doesn't seem to work
-                if (hitWhiteboard)
+                if (endLine)
                 {
-                    throw new NotImplementedException();
+                    endLine = false;
+                    linePoints.Clear();
                 }
-
-                // Draws a line while left mouse is held down
-                linePoints.Add(GetMousePosition());
-                drawLine.positionCount = linePoints.Count;
-                drawLine.SetPositions(linePoints.ToArray());
-                timer = timerDelay;
+                else if (hitWhiteboard)
+                {
+                    // Draws a line while left mouse is held down
+                    linePoints.Add(GetMousePosition());
+                    drawLine.positionCount = linePoints.Count;
+                    drawLine.SetPositions(linePoints.ToArray());
+                    timer = timerDelay;
+                    //throw new NotImplementedException();
+                }
+                
             }
         }
 
@@ -78,10 +91,15 @@ public class WhiteBoard : MonoBehaviour
 
     private Vector3 GetMousePosition()
     {
+        bool prevHitWhiteboard = hitWhiteboard;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        hitWhiteboard = Physics.Raycast(ray, 10, layerMask);
-        var pos = ray.origin + ray.direction * 10;
-        pos.z = 10;
+        RaycastHit hitInfo;
+        hitWhiteboard = GetComponent<Collider>().Raycast(ray, out hitInfo, 10);
+        var pos = hitInfo.point;
+        //hitWhiteboard = Physics.Raycast(ray, 10, layerMask);
+        //var pos = ray.origin + ray.direction * 10;
+        //pos.z = 10;
+        if (prevHitWhiteboard != hitWhiteboard && hitWhiteboard == false) endLine = true;
         return pos;
 
     }
