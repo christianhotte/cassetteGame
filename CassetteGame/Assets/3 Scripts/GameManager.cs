@@ -41,6 +41,11 @@ public class GameManager : MonoBehaviour
         window.SetActive(false);
     }
 
+    public void LoadScene(int buildIndex)
+    {
+        SceneManager.LoadScene(buildIndex);
+    }
+
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -74,5 +79,6 @@ public class GameManager : MonoBehaviour
             loseScreen.SetActive(true);
         }
     }
+
 
 }
