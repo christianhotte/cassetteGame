@@ -38,7 +38,7 @@ public class WhiteBoard : MonoBehaviour
     private void Update()
     {
         //Debug Stuff:
-        if (debugToggleStow) { ToggleStow(deployed); debugToggleStow = false; }
+        if (debugToggleStow) { debugToggleStow = false; ToggleStow(deployed); }
 
         //Dumb Physics Stuff:
         Vector3 targetPosition = transform.localPosition;
