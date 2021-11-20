@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class WhiteBoard : MonoBehaviour
 {
+    public static WhiteBoard main;
+
     private LineRenderer drawLine;
     private List<Vector3> linePoints;
     private float timer;
@@ -28,6 +30,7 @@ public class WhiteBoard : MonoBehaviour
 
     private void Awake()
     {
+        if (main == null) main = this; else Destroy(this); //Singleton-ize this script
         linePoints = new List<Vector3>();
         lineContainer = transform.parent.Find("Lines");
         linesOffset = transform.position - lineContainer.position;
