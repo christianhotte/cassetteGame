@@ -25,8 +25,7 @@ public class WhiteBoard : MonoBehaviour
     private Vector3 linesOffset;
     private bool deployed;
 
-    public bool debugStow;
-    public bool debugDeploy;
+    public bool debugToggleStow;
 
     private void Awake()
     {
@@ -39,8 +38,7 @@ public class WhiteBoard : MonoBehaviour
     private void Update()
     {
         //Debug Stuff:
-        if (debugDeploy) DeployWhiteboard();
-        if (debugStow) StowWhiteboard();
+        if (debugToggleStow) { ToggleStow(deployed); debugToggleStow = false; }
 
         //Dumb Physics Stuff:
         Vector3 targetPosition = transform.localPosition;
@@ -128,21 +126,12 @@ public class WhiteBoard : MonoBehaviour
         return pos;
 
     }
-
-    private void StowWhiteboard()
+    public void ToggleStow(bool stow)
     {
-        //Returns whiteboard to hidden position
+        //Function: Stows or deploys whiteboard (enabling/disabling its functionality)
 
-        debugStow = false;
-        if (!deployed) return;
-        deployed = false;
-    }
-    private void DeployWhiteboard()
-    {
-        //Deploys whiteboard to visible position
-
-        debugDeploy = false;
-        if (deployed) return;
-        deployed = true;
+        //Initialization:
+        if (stow != deployed) return; //Redundancy check
+        deployed = !stow; //Toggle deployment state
     }
 }
