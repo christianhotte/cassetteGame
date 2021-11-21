@@ -802,15 +802,20 @@ MonoBehaviour:
   playerDeployedPos: {fileID: 69174903}
   doorClosedPos: {fileID: 1019149396}
   doorOpenPos: {fileID: 1000528041}
-  buttonPushDepth: 10
+  buttonPushDepth: 0.2
   deploySpeed: 10
   stowSpeed: 6
   deploySnapThresh: 0.005
   doorOpenSpeed: 5
   doorCloseSpeed: 5
   doorSnapThresh: 0.005
+  buttonPressSpeed: 5
+  buttonReleaseSpeed: 5
+  buttonSnapThresh: 0.005
   debugToggleStow: 0
   debugToggleDoor: 0
+  debugToggleButton: 0
+  debugButtonSelector: 0
 --- !u!1001 &890113275
 PrefabInstance:
   m_ObjectHideFlags: 0

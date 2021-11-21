@@ -11,9 +11,9 @@ public class CPController : MonoBehaviour
     private CassetteTape tape;       //Tape currently in cassette player (if any)
 
     [Header("Player Components:")]
-    public Transform model;                        //Transform of model (which gets moved around and animated and stuff)
-    public Transform door;                         //Cassette door model
-    public Transform[] buttons = new Transform[6]; //Button models
+    public Transform model;     //Transform of model (which gets moved around and animated and stuff)
+    public Transform door;      //Cassette door model
+    public Transform[] buttons; //Button models
     [Space()]
 
     //Positions:
@@ -23,40 +23,59 @@ public class CPController : MonoBehaviour
     public Transform doorClosedPos;     //Position of cassette door when closed
     public Transform doorOpenPos;       //Position of cassette door when opened
     public float buttonPushDepth;       //How far buttons travel when pushed
+    private Vector3[] buttonOriginPos = new Vector3[6]; //Local positions buttons start at
 
     //Settings:
     [Header("Settings:")]
-    public float deploySpeed; //How fast cassette player moves when deployed
-    public float stowSpeed;   //How fast cassette player moves when stowed
+    public float deploySpeed;      //How fast cassette player moves when deployed
+    public float stowSpeed;        //How fast cassette player moves when stowed
     public float deploySnapThresh; //How close player can be to target position before it snaps into place
     [Space()]
     public float doorOpenSpeed;  //How fast cassette door opens
     public float doorCloseSpeed; //How fast cassette door closes
     public float doorSnapThresh; //How close door can be to target position before it snaps into place
+    [Space()]
+    public float buttonPressSpeed;   //How fast buttons take to fully move to pressed position
+    public float buttonReleaseSpeed; //How fast buttons take to return to origin once released
+    public float buttonSnapThresh;   //How close buttons can be to target position before they snap into place
 
     //Memory Vars:
-    internal bool stowed = true; //Whether or not the cassette player is stowed
-    internal bool doorOpen;      //Whether or not cassette door is open
+    internal bool stowed = true;               //Whether or not the cassette player is stowed
+    internal bool doorOpen;                    //Whether or not cassette door is open
     private bool[] buttonPushed = new bool[6]; //Whether or not each button (at given index) is currently being pushed
-    private bool stowPosSnapped = true; //Whether or not model has snapped to target deployment position and become static
-    private bool doorPosSnapped = true; //Whether or not door model has snapped to target position and become static
+    private bool stowPosSnapped = true;            //Whether or not model has snapped to target deployment position and become static
+    private bool doorPosSnapped = true;            //Whether or not door model has snapped to target position and become static
+    private bool[] buttonPosSnapped = new bool[6]; //Whether or not button has snapped to target position and become static
 
     //TEMP Debug Stuff:
     [Space()]
     public bool debugToggleStow;
     public bool debugToggleDoor;
+    public bool debugToggleButton;
+    public int debugButtonSelector;
 
     //Game Methods:
     private void Awake()
     {
         //Initialization:
         if (main == null) main = this; else Destroy(this); //Singleton-ize this script
+
+        //Get Origin Positions:
+        for (int i = 0; i < buttons.Length; i++) //Iterate through list of buttons
+        {
+            buttonOriginPos[i] = buttons[i].localPosition; //Log origin position of button (as starting local position)
+        }
     }
     private void Update()
     {
         //Debug Inputs:
         if (debugToggleStow) { debugToggleStow = false; ToggleStow(!stowed); }
         if (debugToggleDoor) { debugToggleDoor = false; ToggleDoor(!doorOpen); }
+        if (debugToggleButton)
+        {
+            debugToggleButton = false;
+            ToggleButton(debugButtonSelector, !buttonPushed[debugButtonSelector]);
+        }
 
         //Animate Deployment:
         if (!stowPosSnapped) //Only perform movement when necessary
@@ -128,6 +147,35 @@ public class CPController : MonoBehaviour
             }
         }
 
+        //Animate Buttons:
+        for (int i = 0; i < buttons.Length; i++) //Iterate through array of buttons
+        {
+            //Initialization:
+            if (buttonPosSnapped[i]) continue; //Only perform movement when necessary
+            Transform button = buttons[i];     //Get reference to current button transform
+
+            //Find Target:
+            Vector3 targetPos = buttonOriginPos[i]; //Initialize position target as starting pos (assume button is being released)
+            float lerpSpeed = buttonReleaseSpeed;   //Get speed of lerp toward target (assume button is being released)
+            if (buttonPushed[i]) //Button is being pushed instead
+            {
+                targetPos.z -= buttonPushDepth; //Apply push depth to base position of button to get pushed position
+                lerpSpeed = buttonPressSpeed;   //Change lerp speed to press setting
+            }
+            lerpSpeed *= Time.deltaTime; //Apply deltaTime to lerp speed
+
+            //Move Model:
+            if (Vector3.Distance(button.localPosition, targetPos) < buttonSnapThresh) //Button is close enough to target to snap into position
+            {
+                button.localPosition = targetPos; //Set position to target
+                buttonPosSnapped[i] = true; //Stop animation once finished
+            }
+            else //Button is still far from target
+            {
+                button.localPosition = Vector3.Lerp(button.localPosition, targetPos, lerpSpeed); //Lerp position toward target
+            }
+        }
+
     }
 
     //Interaction Methods:
@@ -169,13 +217,21 @@ public class CPController : MonoBehaviour
 
         }
     }
+    public void ToggleButton(int buttonIndex, bool press)
+    {
+        //Function: Pushes or releases button at button index
+
+        if (press) PushButton(buttonIndex);
+        else ReleaseButton(buttonIndex);
+    }
     public void PushButton(int buttonIndex)
     {
         //Function: Pushes button at button index (performs animation and programmatic functions)
 
         //Initialization:
         if (buttonPushed[buttonIndex]) return; //Redundancy check
-        buttonPushed[buttonIndex] = true; //Indicate that button is now being pushed
+        buttonPushed[buttonIndex] = true;      //Indicate that button is now being pushed
+        buttonPosSnapped[buttonIndex] = false;  //Unlock button animation
 
         //Execute Button Function:
 
@@ -186,6 +242,10 @@ public class CPController : MonoBehaviour
 
         //Initialization:
         if (!buttonPushed[buttonIndex]) return; //Redundancy check
-        buttonPushed[buttonIndex] = false; //Indicate that button has been released
+        buttonPushed[buttonIndex] = false;      //Indicate that button has been released
+        buttonPosSnapped[buttonIndex] = false;   //Unlock button animation
+
+        //Execute Release Triggers:
+
     }
 }
