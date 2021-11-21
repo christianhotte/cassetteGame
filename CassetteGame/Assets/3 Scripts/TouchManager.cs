@@ -110,14 +110,6 @@ public class TouchManager : MonoBehaviour
         {
             IHoldable controller = hitObject.GetComponentInParent<IHoldable>(); //Get script from touched object if it is holdable
             if (controller != null) controller.TryHold(data); //Try holding object if it is technically holdable
-            /*switch (hitObject.tag) //Determine behavior based on object tag
-            {
-                case "CassetteTape": //Touched object is a cassette tape
-                    CassetteController tapeController = hitObject.GetComponentInParent<CassetteController>(); //Get tape controller component
-                    tapeController.TryHold(data); //Tell tape it is being touched
-                    break;
-                default: break; //Do nothing if tag is not recognized
-            }*/
         }
     }
     private void TouchMoved(TouchData data)

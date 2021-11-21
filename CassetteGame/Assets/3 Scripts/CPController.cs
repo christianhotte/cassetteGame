@@ -7,9 +7,9 @@ public class CPController : MonoBehaviour
     //Description: Governs functions relating to the cassette player
 
     //Objects & Components:
-    public static CPController main; //Singleton instance of this script in scene
-    private CassetteTape tape;       //Tape currently in cassette player (if any)
-    private AudioSource audioSource; //Audio source used to play sound effects
+    public static CPController main;  //Singleton instance of this script in scene
+    internal CassetteController tape; //Tape currently in cassette player (if any)
+    private AudioSource audioSource;  //Audio source used to play sound effects
 
     [Header("Player Components:")]
     public Transform model;     //Transform of model (which gets moved around and animated and stuff)

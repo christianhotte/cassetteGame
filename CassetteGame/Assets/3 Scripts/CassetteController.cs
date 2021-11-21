@@ -59,8 +59,15 @@ public class CassetteController : MonoBehaviour, IHoldable
                 Collider hitCollider = TouchManager.inputManager.CheckTouchedCollider(holdingTouch); //Try to find an object behind the held tape
                 if (hitCollider != null && hitCollider.CompareTag("Recorder")) //Tape is being held over recorder
                 {
-                    //Change State:
-                    inserted = true; //Indicate that tape is inserted into player
+                    //Triggers:
+                    if (!inserted) //Tape is not currently inserted in player
+                    {
+                        if (CPController.main.tape != null) //Player already has a tape in it
+                        {
+                            CPController.main.tape.Pop(); //Pop existing tape out of player
+                        }
+                        Insert(); //Insert tape into player
+                    }
 
                     //Target Inserted Position:
                     posTarget = insertedPosition.position; //Set inserted target
@@ -69,10 +76,10 @@ public class CassetteController : MonoBehaviour, IHoldable
                     posLerpSpeed = insertLerpSpeed;    //Set insertion speed
                     orientLerpSpeed = insertLerpSpeed; //Set insertion speed
                 }
-                else
+                else //Tape is not being held over recorder
                 {
-                    //Change State:
-                    inserted = false; //Indicate that tape is not in the player
+                    //Triggers:
+                    if (inserted) Pop(); //Pop tape out of player
 
                     //Target Touch Position:
                     posTarget = Camera.main.ScreenToWorldPoint(new Vector3(holdingTouch.position.x, holdingTouch.position.y, heldPosition.position.z)); //Apply X and Y values of holding touch to target position
@@ -153,6 +160,12 @@ public class CassetteController : MonoBehaviour, IHoldable
         holdingTouch = touch;    //Associate given touch with this script
         touch.heldObject = this; //Associate this script with given touch
 
+        //Triggers:
+        if (CPController.main.stowed) //Cassette player is on the table
+        {
+            CPController.main.ToggleDoor(true); //Open cassette door
+        }
+
         //Cleanup:
         posSnapped = false; //Unlock movement
     }
@@ -164,8 +177,40 @@ public class CassetteController : MonoBehaviour, IHoldable
         holdingTouch.heldObject = null; //Dissociate this script from releasing touch
         holdingTouch = null;            //Dissociate releasing touch from this script
 
+        //Triggers:
+        if (CPController.main.stowed) //Cassette player is on the table
+        {
+            bool safeToClose = true; //Initialize variable to track whether there are any other held tapes in scene
+            foreach (TouchManager.TouchData touch in TouchManager.inputManager.touchDataList) //Iterate through all current touches
+            {
+                if (touch.heldObject != null) { safeToClose = false; break; } //If another tape is currently being held, do not close door
+            }
+            if (safeToClose) CPController.main.ToggleDoor(false); //Close cassette door (if necessary)
+        }
+
         //Cleanup:
         posSnapped = false; //Unlock movement
+    }
+    public void Insert()
+    {
+        //Function: Inserts tape into cassette player
+
+        //Handshake:
+        CPController.main.tape = this; //Indicate to player that this tape is now inserted
+
+        //Cleanup:
+        inserted = true; //Indicate that tape is now inserted
+
+    }
+    public void Pop()
+    {
+        //Function: Pops tape out of cassette player
+
+        //Handshake:
+        CPController.main.tape = null; //Indicate to player that it no longer has a tape inserted
+
+        //Cleanup:
+        inserted = false; //Indicate that tape is no longer in player
     }
 
     //Audio Methods:
