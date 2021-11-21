@@ -149,7 +149,7 @@ public class TouchManager : MonoBehaviour
         foreach (TouchData item in touchDataList) if (item.fingerID == ID) return item; //Parse through list and return matching item if found
         return null; //If matching item is never found, return null
     }
-    private Collider CheckTouchedCollider(TouchData data)
+    public Collider CheckTouchedCollider(TouchData data)
     {
         //Function: Shoots a ray from camera to point on screen given touch is at, returning the collider (if any) it hits
 
@@ -161,7 +161,6 @@ public class TouchManager : MonoBehaviour
         Vector3 rayOrigin = Camera.main.transform.position; //Get origin of ray (should start from camera)
         Vector3 rayDirection = (rayOrigin - ActualScreenToWorldPoint(data.position)).normalized; //Get direction to shoot ray
         Physics.Raycast(rayOrigin, rayDirection, out hitData, 10); //Get hit data for given ray
-        Debug.DrawRay(rayOrigin, rayDirection, Color.red);
 
         //Cleanup:
         hitCollider = hitData.collider; //Extract collider (if any) from hit data

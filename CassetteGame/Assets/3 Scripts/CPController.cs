@@ -113,7 +113,7 @@ public class CPController : MonoBehaviour
             else //Model is still far from target
             {
                 //Incrementally Move Model Closer to Target:
-                model.position = Vector3.Lerp(model.position, targetPos, lerpSpeed);       //Lerp position toward target
+                model.position = Vector3.Slerp(model.position, targetPos, lerpSpeed);      //Lerp position toward target
                 model.rotation = Quaternion.Lerp(model.rotation, targetRot, lerpSpeed);    //Lerp rotation toward target
                 model.localScale = Vector3.Lerp(model.localScale, targetScale, lerpSpeed); //Lerp scale toward target
             }
