@@ -307,6 +307,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 5ac4c415f0d0067429bdd87e4080f52f, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 43304127e36ee424f9f7f5b3063059d9, type: 2}
     - target: {fileID: 919132149155446097, guid: 5ac4c415f0d0067429bdd87e4080f52f, type: 3}
       propertyPath: m_Name
       value: Cassette
@@ -535,6 +539,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 52944c0266fed304b897e270e679796e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 43304127e36ee424f9f7f5b3063059d9, type: 2}
     - target: {fileID: 919132149155446097, guid: 52944c0266fed304b897e270e679796e, type: 3}
       propertyPath: m_Name
       value: CassetteButton
@@ -1293,14 +1301,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3901992563441801604, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 59e71febad480134faeaa4c5f14c728c, type: 2}
     - target: {fileID: -3316209038747775882, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 56276cd4cd7ea6c4d99a1159d9e1ebfd, type: 2}
+      objectReference: {fileID: 2100000, guid: 42d2e5af2de9f79448bd09a1ad5c8a36, type: 2}
     - target: {fileID: -425565630206218756, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 56276cd4cd7ea6c4d99a1159d9e1ebfd, type: 2}
+      objectReference: {fileID: 2100000, guid: 43304127e36ee424f9f7f5b3063059d9, type: 2}
     - target: {fileID: 919132149155446097, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
       propertyPath: m_Name
       value: room
@@ -1308,11 +1320,11 @@ PrefabInstance:
     - target: {fileID: 1170970068873931921, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 9e4b9ebed116c23479a47c893daf18f9, type: 2}
+      objectReference: {fileID: 2100000, guid: 59e71febad480134faeaa4c5f14c728c, type: 2}
     - target: {fileID: 2929640277652407947, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 56276cd4cd7ea6c4d99a1159d9e1ebfd, type: 2}
+      objectReference: {fileID: 2100000, guid: 42d2e5af2de9f79448bd09a1ad5c8a36, type: 2}
     - target: {fileID: 5898855749840620490, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
       propertyPath: m_LocalScale.y
       value: 2.8169
@@ -1328,7 +1340,7 @@ PrefabInstance:
     - target: {fileID: 5901893356585517859, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 56276cd4cd7ea6c4d99a1159d9e1ebfd, type: 2}
+      objectReference: {fileID: 2100000, guid: 42d2e5af2de9f79448bd09a1ad5c8a36, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7fdac32744cb0b54cb5c5a361bfdca6a, type: 3}
 --- !u!4 &683855486 stripped
@@ -3783,6 +3795,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 5ac4c415f0d0067429bdd87e4080f52f, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 43304127e36ee424f9f7f5b3063059d9, type: 2}
     - target: {fileID: 919132149155446097, guid: 5ac4c415f0d0067429bdd87e4080f52f, type: 3}
       propertyPath: m_Name
       value: Cassette
@@ -4078,6 +4094,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1412038382}
     m_Modifications:
+    - target: {fileID: 3712431187403849933, guid: 8c4101da07c373f4da37e840c4d54881, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.489
+      objectReference: {fileID: 0}
+    - target: {fileID: 3712431187403849933, guid: 8c4101da07c373f4da37e840c4d54881, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 7440798065654464340, guid: 8c4101da07c373f4da37e840c4d54881, type: 3}
       propertyPath: m_Name
       value: Whiteboard
@@ -4126,5 +4150,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8316895774475056556, guid: 8c4101da07c373f4da37e840c4d54881, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 43304127e36ee424f9f7f5b3063059d9, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8c4101da07c373f4da37e840c4d54881, type: 3}
