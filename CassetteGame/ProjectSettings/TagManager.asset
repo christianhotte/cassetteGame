@@ -8,6 +8,7 @@ TagManager:
   - CassetteTape
   - WhiteBoard
   - Background
+  - Button
   layers:
   - Default
   - TransparentFX

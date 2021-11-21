@@ -15,6 +15,8 @@ public class CPController : MonoBehaviour
     public Transform model;     //Transform of model (which gets moved around and animated and stuff)
     public Transform door;      //Cassette door model
     public Transform[] buttons; //Button models
+    private GameObject bounds;         //Player hitbox while stowed
+    private GameObject deployedBounds; //Player hitbox while deployed
     [Space()]
 
     //Positions:
@@ -69,7 +71,9 @@ public class CPController : MonoBehaviour
         }
 
         //Get Components:
-        audioSource = GetComponent<AudioSource>(); //Get audio source object on player
+        audioSource = GetComponent<AudioSource>();     //Get audio source object on player
+        bounds = model.GetChild(0).gameObject;         //Get bounds object
+        deployedBounds = model.GetChild(1).gameObject; //Get deployed bounds object
     }
     private void Update()
     {
@@ -251,17 +255,25 @@ public class CPController : MonoBehaviour
 
         //Initialization:
         if (stow == stowed) return; //Redundancy check
+        if (stowed && tape == null) return; //Prevent deployment while empty
         stowed = stow; //Toggle state
         stowPosSnapped = false; //Unlock deployment animation
 
         //State Change Triggers:
         if (stowed) //Events which trigger upon player being stowed
         {
-            
+            //Swap Hitboxes:
+            bounds.SetActive(true);          //Enable normal bounds
+            deployedBounds.SetActive(false); //Disable deployed bounds
+
+            //Release All Buttons:
+            for (int i = 0; i < buttons.Length; i++) ReleaseButton(i); //Iterate through list of buttons and release each one
         }
         else //Events which trigger upon player being deployed
         {
-
+            //Swap Hitboxes:
+            bounds.SetActive(false);        //Disable normal bounds
+            deployedBounds.SetActive(true); //Enable deployed bounds
         }
     }
     public void ToggleDoor(bool open)
@@ -309,7 +321,7 @@ public class CPController : MonoBehaviour
         //Initialization:
         if (!buttonPushed[buttonIndex]) return; //Redundancy check
         buttonPushed[buttonIndex] = false;      //Indicate that button has been released
-        buttonPosSnapped[buttonIndex] = false;   //Unlock button animation
+        buttonPosSnapped[buttonIndex] = false;  //Unlock button animation
 
         //Execute Release Triggers:
 
