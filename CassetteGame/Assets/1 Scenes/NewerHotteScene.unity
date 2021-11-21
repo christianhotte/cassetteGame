@@ -802,7 +802,7 @@ MonoBehaviour:
   playerDeployedPos: {fileID: 69174903}
   doorClosedPos: {fileID: 1019149396}
   doorOpenPos: {fileID: 1000528041}
-  buttonPushDepth: 0.2
+  buttonPushDepth: -0.2
   deploySpeed: 10
   stowSpeed: 6
   deploySnapThresh: 0.005
