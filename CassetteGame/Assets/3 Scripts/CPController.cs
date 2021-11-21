@@ -9,6 +9,7 @@ public class CPController : MonoBehaviour
     //Objects & Components:
     public static CPController main; //Singleton instance of this script in scene
     private CassetteTape tape;       //Tape currently in cassette player (if any)
+    private AudioSource audioSource; //Audio source used to play sound effects
 
     [Header("Player Components:")]
     public Transform model;     //Transform of model (which gets moved around and animated and stuff)
@@ -35,14 +36,15 @@ public class CPController : MonoBehaviour
     public float doorCloseSpeed; //How fast cassette door closes
     public float doorSnapThresh; //How close door can be to target position before it snaps into place
     [Space()]
+    [Range(0, 1)] public float buttonTriggerThresh; //How far a button has to be pressed before it actually triggers that button's function
     public float buttonPressSpeed;   //How fast buttons take to fully move to pressed position
     public float buttonReleaseSpeed; //How fast buttons take to return to origin once released
     public float buttonSnapThresh;   //How close buttons can be to target position before they snap into place
 
-    //Memory Vars:
-    internal bool stowed = true;               //Whether or not the cassette player is stowed
-    internal bool doorOpen;                    //Whether or not cassette door is open
-    private bool[] buttonPushed = new bool[6]; //Whether or not each button (at given index) is currently being pushed
+    //Status Vars:
+    internal bool stowed = true;                //Whether or not the cassette player is stowed
+    internal bool doorOpen;                     //Whether or not cassette door is open
+    internal bool[] buttonPushed = new bool[6]; //Whether or not each button (at given index) is currently being pushed
     private bool stowPosSnapped = true;            //Whether or not model has snapped to target deployment position and become static
     private bool doorPosSnapped = true;            //Whether or not door model has snapped to target position and become static
     private bool[] buttonPosSnapped = new bool[6]; //Whether or not button has snapped to target position and become static
@@ -54,7 +56,7 @@ public class CPController : MonoBehaviour
     public bool debugToggleButton;
     public int debugButtonSelector;
 
-    //Game Methods:
+    //Runtime Methods:
     private void Awake()
     {
         //Initialization:
@@ -65,6 +67,9 @@ public class CPController : MonoBehaviour
         {
             buttonOriginPos[i] = buttons[i].localPosition; //Log origin position of button (as starting local position)
         }
+
+        //Get Components:
+        audioSource = GetComponent<AudioSource>(); //Get audio source object on player
     }
     private void Update()
     {
@@ -165,17 +170,78 @@ public class CPController : MonoBehaviour
             lerpSpeed *= Time.deltaTime; //Apply deltaTime to lerp speed
 
             //Move Model:
+            float prevPushAmount = Mathf.InverseLerp(buttonOriginPos[i].z, targetPos.z, button.localPosition.z); //Calculate how much button has been pushed (between 0 and 1)
             if (Vector3.Distance(button.localPosition, targetPos) < buttonSnapThresh) //Button is close enough to target to snap into position
             {
+                //Snap Button to Target:
                 button.localPosition = targetPos; //Set position to target
                 buttonPosSnapped[i] = true; //Stop animation once finished
             }
             else //Button is still far from target
             {
+                //Incrementally Move Button Closer to Target:
                 button.localPosition = Vector3.Lerp(button.localPosition, targetPos, lerpSpeed); //Lerp position toward target
+
+                //Check for Trigger Condition:
+                if (buttonPushed[i] && prevPushAmount < buttonTriggerThresh && //Only check while button is being pushed (and has not already triggered function)
+                    tape != null)                                              //And while a tape is inserted
+                {
+                    float pushAmount = Mathf.InverseLerp(buttonOriginPos[i].z, targetPos.z, button.localPosition.z); //Calculate push amount again, after motion
+                    if (pushAmount >= buttonTriggerThresh) //Button has just passed trigger threshold
+                    {
+                        switch (i) //Determine function to trigger depending on button index
+                        {
+                            case 0: OnRecord(); break;
+                            case 1: OnRewind(); break;
+                            case 2: OnPlay(); break;
+                            case 3: OnPause(); break;
+                            case 4: OnFastForward(); break;
+                            case 5: OnEject(); break;
+                        }
+                    }
+                }
+                
             }
         }
 
+    }
+
+    //Cassette Tape Methods:
+    public void OnRecord()
+    {
+        //Function: Called when Record button is pressed
+
+        
+    }
+    public void OnRewind()
+    {
+        //Function: Called when Rewind button is pressed
+
+        
+    }
+    public void OnPlay()
+    {
+        //Function: Called when Play button is pressed
+
+        
+    }
+    public void OnPause()
+    {
+        //Function: Called when Pause button is pressed
+
+        
+    }
+    public void OnFastForward()
+    {
+        //Function: Called when FastForward button is pressed
+
+        
+    }
+    public void OnEject()
+    {
+        //Function: Called when Eject button is pressed
+
+        
     }
 
     //Interaction Methods:
@@ -233,7 +299,7 @@ public class CPController : MonoBehaviour
         buttonPushed[buttonIndex] = true;      //Indicate that button is now being pushed
         buttonPosSnapped[buttonIndex] = false;  //Unlock button animation
 
-        //Execute Button Function:
+        //Initial Button Press Triggers:
 
     }
     public void ReleaseButton(int buttonIndex)

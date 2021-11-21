@@ -20,6 +20,9 @@ public class TouchManager : MonoBehaviour
         public int fingerID;     //The ID number linking this object to an existing touch
         public float touchTime = 0; //The amount of time this touch has been active for
 
+        //Game-Specific Data:
+        public CassetteController heldTape; //Tape this touch is currently holding (if any)
+
         //Meta:
         public bool markedForDisposal = false; //Set true once this object's associated touch has ended
         public bool markedComplete = false;    //Set true once this touch creates an input event (does not destroy object but prevents it from triggering more events)
@@ -102,7 +105,8 @@ public class TouchManager : MonoBehaviour
     private void TouchStarted(TouchData data)
     {
         //Process Input Event:
-        
+        CheckTouchedCollider(data);
+
     }
     private void TouchMoved(TouchData data)
     {
@@ -132,5 +136,23 @@ public class TouchManager : MonoBehaviour
         if (touchDataList.Count == 0) return null; //Return null if there are no items to return
         foreach (TouchData item in touchDataList) if (item.fingerID == ID) return item; //Parse through list and return matching item if found
         return null; //If matching item is never found, return null
+    }
+    private Collider CheckTouchedCollider(TouchData data)
+    {
+        //Function: Shoots a ray from camera to point on screen given touch is at, returning the collider (if any) it hits
+
+        //Initialization:
+        RaycastHit hitData;          //Create object to hold data from raycast
+        Collider hitCollider = null; //Initialize collider to return (make null in case ray doesn't hit anything)
+
+        //Try Raycast:
+        Vector3 rayOrigin = Camera.main.transform.position; //Get origin of ray (should start from camera)
+        Vector3 rayDirection = (ActualScreenToWorldPoint(data.position) - rayOrigin).normalized; //Get direction to shoot ray
+        Physics.Raycast(rayOrigin, rayDirection, out hitData, 10); //Get hit data for given ray
+        Debug.DrawRay(rayOrigin, rayDirection, Color.red);
+
+        //Cleanup:
+        hitCollider = hitData.collider; //Extract collider (if any) from hit data
+        return hitCollider; //Return hit collider (or null if nothing was hit)
     }
 }
