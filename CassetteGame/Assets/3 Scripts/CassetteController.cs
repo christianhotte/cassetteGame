@@ -9,7 +9,7 @@ public class CassetteController : MonoBehaviour, IHoldable
     //Objects & Components:
     public string clipName;          //Name of this recording (to display to player)
     private AudioSource audioSource; //The audio source used to play this tape
-    private Transform model;         //Model to move
+    internal Transform model;        //Model to move
     private GameObject bounds;       //Object containing bounding box
     internal TouchManager.TouchData holdingTouch; //Touch holding this tape (if tape is being held)
 

@@ -145,6 +145,9 @@ public class CPController : MonoBehaviour
                 door.position = targetPos; //Set position to target
                 door.rotation = targetRot; //Set rotation to target
 
+                //Triggers:
+                if (tape != null && !doorOpen) tape.model.gameObject.SetActive(false); //Deactivate tape model to prevent weird clipping (and maybe raycast conflicts I dunno)
+
                 //Cleanup:
                 doorPosSnapped = true; //Stop animation once finished
             }
@@ -285,10 +288,10 @@ public class CPController : MonoBehaviour
         doorOpen = open; //Toggle state
         doorPosSnapped = false; //Unlock door animation
 
-        //State Change Triggers:
+        //Triggers:
         if (doorOpen) //Events which trigger upon door being opened
         {
-
+            if (tape != null) tape.model.gameObject.SetActive(true); //Re-activate tape model
         }
         else //Events which trigger upon door being closed
         {
