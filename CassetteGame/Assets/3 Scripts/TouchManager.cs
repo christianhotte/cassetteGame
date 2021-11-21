@@ -21,7 +21,7 @@ public class TouchManager : MonoBehaviour
         public float touchTime = 0; //The amount of time this touch has been active for
 
         //Game-Specific Data:
-        public GameObject heldObject = null; //Moveable object this touch is currently holding (if any)
+        public IHoldable heldObject; //Moveable object this touch is currently holding (if any)
 
         //Meta:
         public bool markedForDisposal = false; //Set true once this object's associated touch has ended
@@ -108,14 +108,16 @@ public class TouchManager : MonoBehaviour
         Collider hitObject = CheckTouchedCollider(data); //Look for object hit by touch
         if (hitObject != null) //Touch has hit an object
         {
-            switch (hitObject.tag) //Determine behavior based on object tag
+            IHoldable controller = hitObject.GetComponentInParent<IHoldable>(); //Get script from touched object if it is holdable
+            if (controller != null) controller.TryHold(data); //Try holding object if it is technically holdable
+            /*switch (hitObject.tag) //Determine behavior based on object tag
             {
                 case "CassetteTape": //Touched object is a cassette tape
                     CassetteController tapeController = hitObject.GetComponentInParent<CassetteController>(); //Get tape controller component
                     tapeController.TryHold(data); //Tell tape it is being touched
                     break;
                 default: break; //Do nothing if tag is not recognized
-            }
+            }*/
         }
     }
     private void TouchMoved(TouchData data)
@@ -126,7 +128,7 @@ public class TouchManager : MonoBehaviour
     private void TouchEnded(TouchData data)
     {
         //Process Input Event:
-
+        if (data.heldObject != null) data.heldObject.Release(); //Release held object
     }
 
     //UTILITY METHODS:
