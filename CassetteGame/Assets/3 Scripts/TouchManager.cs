@@ -21,7 +21,7 @@ public class TouchManager : MonoBehaviour
         public float touchTime = 0; //The amount of time this touch has been active for
 
         //Game-Specific Data:
-        public CassetteController heldTape; //Tape this touch is currently holding (if any)
+        public GameObject heldObject = null; //Moveable object this touch is currently holding (if any)
 
         //Meta:
         public bool markedForDisposal = false; //Set true once this object's associated touch has ended
@@ -105,13 +105,23 @@ public class TouchManager : MonoBehaviour
     private void TouchStarted(TouchData data)
     {
         //Process Input Event:
-        CheckTouchedCollider(data);
-
+        Collider hitObject = CheckTouchedCollider(data); //Look for object hit by touch
+        if (hitObject != null) //Touch has hit an object
+        {
+            switch (hitObject.tag) //Determine behavior based on object tag
+            {
+                case "CassetteTape": //Touched object is a cassette tape
+                    CassetteController tapeController = hitObject.GetComponentInParent<CassetteController>(); //Get tape controller component
+                    tapeController.TryHold(data); //Tell tape it is being touched
+                    break;
+                default: break; //Do nothing if tag is not recognized
+            }
+        }
     }
     private void TouchMoved(TouchData data)
     {
         //Process Input Event:
-        
+
     }
     private void TouchEnded(TouchData data)
     {
@@ -147,7 +157,7 @@ public class TouchManager : MonoBehaviour
 
         //Try Raycast:
         Vector3 rayOrigin = Camera.main.transform.position; //Get origin of ray (should start from camera)
-        Vector3 rayDirection = (ActualScreenToWorldPoint(data.position) - rayOrigin).normalized; //Get direction to shoot ray
+        Vector3 rayDirection = (rayOrigin - ActualScreenToWorldPoint(data.position)).normalized; //Get direction to shoot ray
         Physics.Raycast(rayOrigin, rayDirection, out hitData, 10); //Get hit data for given ray
         Debug.DrawRay(rayOrigin, rayDirection, Color.red);
 

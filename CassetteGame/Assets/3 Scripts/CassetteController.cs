@@ -36,7 +36,12 @@ public class CassetteController : MonoBehaviour
     }
 
     //Interaction Methods:
+    public void TryHold(TouchManager.TouchData touch)
+    {
+        //Function: Called by InputManager when this tape is touched
 
+
+    }
 
     //Audio Methods:
 
