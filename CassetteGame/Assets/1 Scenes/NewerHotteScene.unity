@@ -3484,9 +3484,10 @@ GameObject:
   - component: {fileID: 1708532741}
   - component: {fileID: 1708532743}
   - component: {fileID: 1708532742}
+  - component: {fileID: 1708532744}
   m_Layer: 0
   m_Name: Whiteboard Mirror
-  m_TagString: Untagged
+  m_TagString: WhiteBoard
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3554,6 +3555,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1708532740}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1708532744
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708532740}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 2.2326863}
+  m_Center: {x: 0, y: 0, z: -0.61634314}
 --- !u!1001 &1760881447
 PrefabInstance:
   m_ObjectHideFlags: 0

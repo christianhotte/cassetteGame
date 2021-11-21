@@ -23,7 +23,7 @@ public class WhiteBoard : MonoBehaviour
     private bool hitWhiteboard;
     private bool endLine;
     private Vector3 linesOffset;
-    private bool deployed;
+    internal bool deployed;
 
     public bool debugToggleStow;
 
@@ -69,7 +69,7 @@ public class WhiteBoard : MonoBehaviour
                 drawLine.endWidth = lineWidth;
                 drawLine.useWorldSpace = false;
             }
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) && drawLine != null)
             {
                 Debug.DrawRay(Camera.main.ScreenToWorldPoint(Input.mousePosition), GetMousePosition(), Color.red);
                 timer -= Time.deltaTime;
@@ -133,5 +133,11 @@ public class WhiteBoard : MonoBehaviour
         //Initialization:
         if (stow != deployed) return; //Redundancy check
         deployed = !stow; //Toggle deployment state
+        
+        //Triggers:
+        if (!deployed) //Whiteboard is being stowed
+        {
+            Destroy(newline); //Destroy existing line to prevent unsightly scribbles
+        }
     }
 }

@@ -108,9 +108,41 @@ public class TouchManager : MonoBehaviour
         Collider hitObject = CheckTouchedCollider(data); //Look for object hit by touch
         if (hitObject != null) //Touch has hit an object
         {
+            //Check for Cassette Player:
+            if (hitObject.CompareTag("Recorder")) //Player has touched the cassette player
+            {
+                //Determine Touch Behavior:
+                if (CPController.main.stowed) //Cassette player is currently on the table
+                {
+                    CPController.main.ToggleStow(false); //Deploy cassette player
+                }
+                else //Cassette player is currently deployed
+                {
+                    CPController.main.ToggleStow(true); //Stow cassette player
+                }
+                return; //Skip other checks
+            }
+
+            //Check for WhiteBoard:
+            if (hitObject.CompareTag("WhiteBoard")) //Player has touched the whiteboard
+            {
+                //Determine Touch Behavior:
+                if (!WhiteBoard.main.deployed) //Whiteboard is currently stowed
+                {
+                    WhiteBoard.main.ToggleStow(false); //Deploy whiteboard
+                }
+                else //Whiteboard is currently deployed
+                {
+                    WhiteBoard.main.ToggleStow(true); //Stow whiteboard
+                }
+                return; //Skip other checks
+            }
+
+            //Check for Tape:
             IHoldable controller = hitObject.GetComponentInParent<IHoldable>(); //Get script from touched object if it is holdable
             if (controller != null) controller.TryHold(data); //Try holding object if it is technically holdable
         }
+        
     }
     private void TouchMoved(TouchData data)
     {
