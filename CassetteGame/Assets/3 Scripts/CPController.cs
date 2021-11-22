@@ -383,12 +383,17 @@ public class CPController : MonoBehaviour
     {
         //Function: Updates tracker UI to match status of currently-inserted tape
 
+        //Update Nameplate:
+        if (tape != null) namePlate.text = tape.clipName; //Set nameplate to name of tape
+        else namePlate.text = "";                         //Clear nameplate
+
         //Reset Record Bar:
         recordBar.sizeDelta = new Vector2(0, trackerBar.rect.height); //Make bar invisible by setting width to zero
         recordBar.localPosition = trackerBar.localPosition;           //Move bar to beginning of tracker
 
         //Update Progress Bar:
-        progressBar.sizeDelta = new Vector2(Mathf.Lerp(0, trackerBar.rect.width, tape.progress), trackerBar.rect.height); //Set position of progress bar based on current progress through tape
+        if (tape != null) progressBar.sizeDelta = new Vector2(Mathf.Lerp(0, trackerBar.rect.width, tape.progress), trackerBar.rect.height); //Set position of progress bar based on current progress through tape
+        else progressBar.sizeDelta = new Vector2(0, trackerBar.rect.height); //If no tape is inserted, simply clear progress bar
 
         //Initialize TimeStamp:
         UpdateTimeStamp(); //Perform timestamp update function to initialize readout
@@ -479,6 +484,14 @@ public class CPController : MonoBehaviour
     public void UpdateTimeStamp()
     {
         //Function: Updates timestamp to match length and progress of inserted tape
+
+        //Initial Check:
+        if (tape == null) //No tape is inserted
+        {
+            timeTick.localPosition = trackerBar.localPosition; //Reset position of tick
+            timeStamp.text = "0:00/0:00"; //Clear timestamp text
+            return; //Skip all other checks
+        }
 
         //Update Tick Position:
         Vector3 tickPosition = trackerBar.localPosition; //Reference local position of tracker bar

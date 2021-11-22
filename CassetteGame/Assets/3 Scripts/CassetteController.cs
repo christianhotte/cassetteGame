@@ -198,7 +198,6 @@ public class CassetteController : MonoBehaviour, IHoldable
         //Handshake:
         CPController.main.tape = this;               //Indicate to player that this tape is now inserted
         CPController.main.SetTrackerUI();            //Update tracker UI on player
-        CPController.main.namePlate.text = clipName; //Assign this tape's name to player nameplate
 
         //Cleanup:
         inserted = true; //Indicate that tape is now inserted
@@ -210,8 +209,7 @@ public class CassetteController : MonoBehaviour, IHoldable
 
         //Handshake:
         CPController.main.tape = null;                  //Indicate to player that it no longer has a tape inserted
-        CPController.main.namePlate.text = "";          //Clear nameplate
-        CPController.main.timeStamp.text = "0:00/0:00"; //Clear timestamp
+        CPController.main.SetTrackerUI();               //Reset player UI
 
         //Cleanup:
         inserted = false; //Indicate that tape is no longer in player
