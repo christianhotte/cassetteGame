@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class WhiteBoard : MonoBehaviour
 {
+    public static WhiteBoard main;
+
     private LineRenderer drawLine;
     private List<Vector3> linePoints;
     private float timer;
@@ -21,13 +23,13 @@ public class WhiteBoard : MonoBehaviour
     private bool hitWhiteboard;
     private bool endLine;
     private Vector3 linesOffset;
-    private bool deployed;
+    internal bool deployed;
 
-    public bool debugStow;
-    public bool debugDeploy;
+    public bool debugToggleStow;
 
     private void Awake()
     {
+        if (main == null) main = this; else Destroy(this); //Singleton-ize this script
         linePoints = new List<Vector3>();
         lineContainer = transform.parent.Find("Lines");
         linesOffset = transform.position - lineContainer.position;
@@ -36,8 +38,7 @@ public class WhiteBoard : MonoBehaviour
     private void Update()
     {
         //Debug Stuff:
-        if (debugDeploy) DeployWhiteboard();
-        if (debugStow) StowWhiteboard();
+        if (debugToggleStow) { debugToggleStow = false; ToggleStow(deployed); }
 
         //Dumb Physics Stuff:
         Vector3 targetPosition = transform.localPosition;
@@ -68,7 +69,7 @@ public class WhiteBoard : MonoBehaviour
                 drawLine.endWidth = lineWidth;
                 drawLine.useWorldSpace = false;
             }
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) && drawLine != null)
             {
                 Debug.DrawRay(Camera.main.ScreenToWorldPoint(Input.mousePosition), GetMousePosition(), Color.red);
                 timer -= Time.deltaTime;
@@ -125,21 +126,19 @@ public class WhiteBoard : MonoBehaviour
         return pos;
 
     }
-
-    private void StowWhiteboard()
+    public void ToggleStow(bool stow)
     {
-        //Returns whiteboard to hidden position
+        //Function: Stows or deploys whiteboard (enabling/disabling its functionality)
 
-        debugStow = false;
-        if (!deployed) return;
-        deployed = false;
-    }
-    private void DeployWhiteboard()
-    {
-        //Deploys whiteboard to visible position
-
-        debugDeploy = false;
-        if (deployed) return;
-        deployed = true;
+        //Initialization:
+        if (stow != deployed) return; //Redundancy check
+        deployed = !stow; //Toggle deployment state
+        
+        //Triggers:
+        if (!deployed) //Whiteboard is being stowed
+        {
+            Destroy(newline); //Destroy existing line to prevent unsightly scribbles
+        }
+        GetComponent<AudioSource>().Play();
     }
 }

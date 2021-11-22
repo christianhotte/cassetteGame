@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Recorder
   - CassetteTape
+  - WhiteBoard
+  - Background
+  - Button
   layers:
   - Default
   - TransparentFX

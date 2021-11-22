@@ -20,6 +20,10 @@ public class TouchManager : MonoBehaviour
         public int fingerID;     //The ID number linking this object to an existing touch
         public float touchTime = 0; //The amount of time this touch has been active for
 
+        //Game-Specific Data:
+        public IHoldable heldObject;       //Moveable object this touch is currently holding (if any)
+        public int pushedButtonIndex = -1; //Index of button currently being pushed by this touch (negative if null)
+
         //Meta:
         public bool markedForDisposal = false; //Set true once this object's associated touch has ended
         public bool markedComplete = false;    //Set true once this touch creates an input event (does not destroy object but prevents it from triggering more events)
@@ -101,18 +105,106 @@ public class TouchManager : MonoBehaviour
     //INPUT EVENTS:
     private void TouchStarted(TouchData data)
     {
-        //Process Input Event:
+        Collider hitObject = CheckTouchedCollider(data); //Look for object hit by touch
+        if (hitObject != null) //Touch has hit an object
+        {
+            //Check for Cassette Player:
+            if (hitObject.CompareTag("Recorder")) //Player has touched the cassette player
+            {
+                //Determine Touch Behavior:
+                if (CPController.main.stowed) //Cassette player is currently on the table
+                {
+                    CPController.main.ToggleStow(false); //Deploy cassette player
+                }
+                else //Cassette player is currently deployed
+                {
+                    CPController.main.ToggleStow(true); //Stow cassette player
+                }
+                return; //Skip other checks
+            }
+
+            //Check for WhiteBoard:
+            if (hitObject.CompareTag("WhiteBoard")) //Player has touched the whiteboard
+            {
+                //Determine Touch Behavior:
+                if (!WhiteBoard.main.deployed) //Whiteboard is currently stowed
+                {
+                    WhiteBoard.main.ToggleStow(false); //Deploy whiteboard
+                }
+                else //Whiteboard is currently deployed
+                {
+                    WhiteBoard.main.ToggleStow(true); //Stow whiteboard
+                }
+                return; //Skip other checks
+            }
+
+            //Check For Button:
+            if (!CPController.main.stowed && hitObject.CompareTag("Button")) //Player has touched a button (while CP is deployed)
+            {
+                Transform pushedButton = hitObject.transform; //Get transform of touched button
+                for (int i = 0; i < CPController.main.buttons.Length; i++) //Iterate through list of buttons on CP
+                {
+                    if (pushedButton == CPController.main.buttons[i]) //Find index of pushed button
+                    {
+                        CPController.main.PushButton(i); //Push button
+                        data.pushedButtonIndex = i;      //Record index of pushed button
+                    }
+                }
+            }
+
+            //Check for Tape:
+            IHoldable controller = hitObject.GetComponentInParent<IHoldable>(); //Get script from touched object if it is holdable
+            if (controller != null) controller.TryHold(data); //Try holding object if it is technically holdable
+        }
         
     }
     private void TouchMoved(TouchData data)
     {
-        //Process Input Event:
-        
+        //Check for Button Changes:
+        if (!CPController.main.stowed) //Only check while CP is deployed
+        {
+            Collider hitObject = CheckTouchedCollider(data); //Look for object hit by touch
+            if (hitObject == null || !hitObject.CompareTag("Button")) //Touch is not on a button
+            {
+                if (data.pushedButtonIndex >= 0) //Touch was previously on a button
+                {
+                    CPController.main.ReleaseButton(data.pushedButtonIndex); //Release button
+                    data.pushedButtonIndex = -1; //Clear index marker in touch data
+                }
+            }
+            else //Touch is on a button
+            {
+                //Find Button Currently Being Pressed:
+                int foundButtonIndex = 0; //Initialize variable to store index button currently being touched
+                for (int i = 0; i < CPController.main.buttons.Length; i++) //Iterate through list of buttons
+                {
+                    if (CPController.main.buttons[i] == hitObject.transform) //Found button
+                    {
+                        foundButtonIndex = i; //Record index
+                        break; //Break out of loop
+                    }
+                }
+
+                //Compare Found Button to Previously Pressed Button:
+                if (data.pushedButtonIndex < 0) //Touch was not previously on a button
+                {
+                    CPController.main.PushButton(foundButtonIndex); //Push new button
+                    data.pushedButtonIndex = foundButtonIndex;      //Update button reference in data
+                }
+                else if (foundButtonIndex != data.pushedButtonIndex) //Indexes do not match, player is pressing a new button
+                {
+                    CPController.main.ReleaseButton(data.pushedButtonIndex); //Release button
+                    CPController.main.PushButton(foundButtonIndex);          //Push new button
+                    data.pushedButtonIndex = foundButtonIndex;               //Update button reference in data
+                }
+
+            }
+        }
     }
     private void TouchEnded(TouchData data)
     {
-        //Process Input Event:
-
+        if (data.heldObject != null) data.heldObject.Release(); //Release held object
+        if (data.pushedButtonIndex >= 0) CPController.main.ReleaseButton(data.pushedButtonIndex); //Release held button
     }
 
     //UTILITY METHODS:
@@ -132,5 +224,22 @@ public class TouchManager : MonoBehaviour
         if (touchDataList.Count == 0) return null; //Return null if there are no items to return
         foreach (TouchData item in touchDataList) if (item.fingerID == ID) return item; //Parse through list and return matching item if found
         return null; //If matching item is never found, return null
+    }
+    public Collider CheckTouchedCollider(TouchData data)
+    {
+        //Function: Shoots a ray from camera to point on screen given touch is at, returning the collider (if any) it hits
+
+        //Initialization:
+        RaycastHit hitData;          //Create object to hold data from raycast
+        Collider hitCollider = null; //Initialize collider to return (make null in case ray doesn't hit anything)
+
+        //Try Raycast:
+        Vector3 rayOrigin = Camera.main.transform.position; //Get origin of ray (should start from camera)
+        Vector3 rayDirection = (rayOrigin - ActualScreenToWorldPoint(data.position)).normalized; //Get direction to shoot ray
+        Physics.Raycast(rayOrigin, rayDirection, out hitData, 10); //Get hit data for given ray
+
+        //Cleanup:
+        hitCollider = hitData.collider; //Extract collider (if any) from hit data
+        return hitCollider; //Return hit collider (or null if nothing was hit)
     }
 }
