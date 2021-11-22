@@ -15,9 +15,12 @@ public class CPController : MonoBehaviour
     public Transform model;     //Transform of model (which gets moved around and animated and stuff)
     public Transform door;      //Cassette door model
     public Transform[] buttons; //Button models
+    [Space()]
+    public RectTransform trackerBar;  //UI element representing tracker bar
+    public RectTransform progressBar; //UI element representing progress of current tape
+    public RectTransform recordBar;   //UI element representing current recorded area
     private GameObject bounds;         //Player hitbox while stowed
     private GameObject deployedBounds; //Player hitbox while deployed
-    [Space()]
 
     //Positions:
     [Header("Component Positions:")]
@@ -44,12 +47,16 @@ public class CPController : MonoBehaviour
     public float buttonSnapThresh;   //How close buttons can be to target position before they snap into place
 
     //Status Vars:
-    internal bool stowed = true;                //Whether or not the cassette player is stowed
-    internal bool doorOpen;                     //Whether or not cassette door is open
-    internal bool[] buttonPushed = new bool[6]; //Whether or not each button (at given index) is currently being pushed
+    internal bool stowed = true;                   //Whether or not the cassette player is stowed
+    internal bool doorOpen;                        //Whether or not cassette door is open
+    internal bool[] buttonPushed = new bool[6];    //Whether or not each button (at given index) is currently being pushed
     private bool stowPosSnapped = true;            //Whether or not model has snapped to target deployment position and become static
     private bool doorPosSnapped = true;            //Whether or not door model has snapped to target position and become static
     private bool[] buttonPosSnapped = new bool[6]; //Whether or not button has snapped to target position and become static
+    private bool playing = false;                  //Whether or not inserted tape is currently being played
+    private bool recording = false;                //Whether or not player is currently recording clip from inserted tape
+    private float recordStart = -1;                //Starting point of current record area (negative if NA)
+    private float recordLength;                    //Length of current recorded area
 
     //TEMP Debug Stuff:
     [Space()]
@@ -110,6 +117,9 @@ public class CPController : MonoBehaviour
                 model.position = targetPos;     //Set position to target
                 model.rotation = targetRot;     //Set rotation to target
                 model.localScale = targetScale; //Set scale to target
+
+                //Triggers:
+                if (doorOpen && stowed && tape != null) tape.Eject(); //Special trigger for releasing tape when pressing the eject button
 
                 //Cleanup:
                 stowPosSnapped = true; //Stop animation once finished
@@ -211,6 +221,42 @@ public class CPController : MonoBehaviour
             }
         }
 
+        //Check Tape Progress:
+        if (tape != null && playing) //Player currently contains a tape (which is being played)
+        {
+            //Update Progress:
+            float progress = tape.audioSource.time / tape.audioSource.clip.length; //Get progress through current tape as float between 0 and 1
+            tape.progress = progress; //Record progress on tape
+
+            //Check For End Triggers:
+            if (tape.audioSource.pitch > 0 && progress >= 1) //Tape has reached its end (while moving forward)
+            {
+                //End Trigger:
+                progress = 1;               //Lock progress to 0
+                playing = false;            //Indicate that tape is no longer being played
+                tape.audioSource.pitch = 1; //Reset playback speed
+                tape.audioSource.Pause();   //Pause clip at end
+            }
+            else if (tape.audioSource.pitch < 0 && progress <= 0) //Tape has reached its beginning (while moving backward)
+            {
+                //End (Beginning) Trigger:
+                progress = 0;               //Lock progress to 0
+                playing = false;            //Indicate that tape is no longer being played
+                tape.audioSource.pitch = 1; //Reset playback speed
+                tape.audioSource.Stop();    //Stop clip at beginning
+            }
+
+            //Update Tracker Bars:
+            progressBar.sizeDelta = new Vector2(Mathf.Lerp(0, trackerBar.rect.width, progress), trackerBar.rect.height); //Set position of progress bar based on current progress through tape
+            if (recording) //Player is currently recording
+            {
+                float startPosition = Mathf.Lerp(0, trackerBar.rect.width, recordStart); //Get X position of record bar left bound
+                float endPosition = Mathf.Lerp(0, trackerBar.rect.width, progress);      //Get X position of record bar right bound
+                float newWidth = endPosition - startPosition;                            //Get width record bar should be
+                recordBar.sizeDelta = new Vector2(newWidth, trackerBar.rect.height);     //Set new width
+            }
+
+        }
     }
 
     //Cassette Tape Methods:
@@ -218,40 +264,128 @@ public class CPController : MonoBehaviour
     {
         //Function: Called when Record button is pressed
 
-        
+        //Record Start or End Behavior:
+        if (recording) //Player is currently recording
+        {
+            //End Recording:
+            recording = false; //Indicate that player is no longer recording
+
+        }
+        else //Player is not currently recording
+        {
+            //Start Recording:
+            recording = true; //Indicate that player is now recording
+            recordStart = tape.progress; //Start recording at current position on tape
+            recordLength = 0; //Reset recording length (for new recording)
+
+            //Position Record Bar:
+            Vector3 newPosition = trackerBar.localPosition; //Get local position of tracker bar to base record bar position off of
+            newPosition.x = Mathf.Lerp(newPosition.x, newPosition.x + trackerBar.rect.width, recordStart); //Set position to beginning of recording area
+            recordBar.localPosition = newPosition; //Move record bar to new position
+            recordBar.sizeDelta = new Vector2(recordLength, trackerBar.rect.height); //Apply reset record bar length
+            
+        }
     }
     public void OnRewind()
     {
         //Function: Called when Rewind button is pressed
 
-        
+        //Decrease Speed:
+        if (tape.audioSource.pitch > 0) tape.audioSource.pitch = -1; //Reverse at normal speed if tape is already playing
+        else tape.audioSource.pitch *= 2; //Double reverse speed if already reversing
+
+        //Play Clip:
+        if (!playing) //Tape is not already playing
+        {
+            if (tape.progress > 0) //Only play if tape is not in starting position
+            {
+                playing = true; //Indicate that tape is now playing
+                tape.audioSource.UnPause(); //Un-pause tape
+            }
+            //NOTE: Does not play when tape is at 0 because tape cannot rewind
+        }
     }
     public void OnPlay()
     {
         //Function: Called when Play button is pressed
 
-        
+        //Initialization:
+        if (tape.progress == 1) return; //Ignore if player is at the end of the tape
+        tape.audioSource.pitch = 1; //Set pitch to 1 (normal speed)
+        if (playing) return; //Ignore if player is already playing the tape
+
+        //Play Clip:
+        if (tape.progress > 0) tape.audioSource.UnPause(); //Un-pause tape
+        else tape.audioSource.Play(); //Play tape
+
+        //Cleanup:
+        playing = true; //Indicate that player is now playing a tape
     }
     public void OnPause()
     {
         //Function: Called when Pause button is pressed
 
-        
+        //Initialization:
+        if (!playing) return; //Ignore if player is not currently playing a tape
+
+        //Pause Clip:
+        tape.audioSource.Pause(); //Pause clip
+
+        //Cleanup:
+        playing = false;
     }
     public void OnFastForward()
     {
         //Function: Called when FastForward button is pressed
 
-        
+        //Increase Speed:
+        if (tape.audioSource.pitch < 0) tape.audioSource.pitch = 2; //Play at double speed if reversing currently
+        tape.audioSource.pitch *= 2; //Double speed
+
+        //Play Clip:
+        if (!playing) //Tape is not already playing
+        {
+            if (tape.progress == 1) return;                         //Ignore if tape is already at its end
+            else if (tape.progress > 0) tape.audioSource.UnPause(); //Un-pause tape
+            else tape.audioSource.Play();                           //Play tape
+        }
     }
     public void OnEject()
     {
         //Function: Called when Eject button is pressed
 
-        
+        //Stop Tape:
+        if (playing) //Tape is currently playing
+        {
+            //Change Status:
+            playing = false;   //Indicate that tape is no longer being played
+            recording = false; //Indicate that tape is no longer being recorded
+
+            //Stop Clip:
+            tape.audioSource.Pause(); //Pause clip
+        }
+
+        //Ejection Procedure:
+        ToggleDoor(true); //Pop door open
+        ToggleStow(true); //Return player to table
     }
 
     //Interaction Methods:
+    public void SetTrackerUI()
+    {
+        //Function: Updates tracker UI to match status of currently-inserted tape
+
+        //Reset Record Bar:
+        recordBar.sizeDelta = new Vector2(0, trackerBar.rect.height); //Make bar invisible by setting width to zero
+        recordBar.localPosition = trackerBar.localPosition;           //Move bar to beginning of tracker
+
+        //Update Progress Bar:
+        progressBar.sizeDelta = new Vector2(Mathf.Lerp(0, trackerBar.rect.width, tape.progress), trackerBar.rect.height); //Set position of progress bar based on current progress through tape
+
+        //Update Status Vars:
+        recordStart = -1; //Clear recording data
+        recordLength = 0; //Clear recording data
+    }
     public void ToggleStow(bool stow)
     {
         //Function: Slides player on or off screen

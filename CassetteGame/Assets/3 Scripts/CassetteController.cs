@@ -8,7 +8,7 @@ public class CassetteController : MonoBehaviour, IHoldable
 
     //Objects & Components:
     public string clipName;          //Name of this recording (to display to player)
-    private AudioSource audioSource; //The audio source used to play this tape
+    internal AudioSource audioSource; //The audio source used to play this tape
     internal Transform model;        //Model to move
     private GameObject bounds;       //Object containing bounding box
     internal TouchManager.TouchData holdingTouch; //Touch holding this tape (if tape is being held)
@@ -28,9 +28,9 @@ public class CassetteController : MonoBehaviour, IHoldable
     public float moveSnapThresh;      //How close to target tape must be to snap into place
 
     //Status Vars:
-    [ShowOnly] public float progress = 0; //How wound/unwound this tape currently is (between 0 and 1)
-    internal bool inserted = false;       //Whether or not tape is inserted into player
-    private bool posSnapped = true;      //Determines whether or not tape needs to move on the upcoming frame
+    internal float progress = 0;    //How far along recording currently is (between 0 and 1)
+    internal bool inserted = false; //Whether or not tape is inserted into player
+    private bool posSnapped = true; //Determines whether or not tape needs to move on the upcoming frame
 
     //Runtime Methods:
     private void Awake()
@@ -64,7 +64,7 @@ public class CassetteController : MonoBehaviour, IHoldable
                     {
                         if (CPController.main.tape != null) //Player already has a tape in it
                         {
-                            CPController.main.tape.Pop(); //Pop existing tape out of player
+                            CPController.main.tape.Eject(); //Pop existing tape out of player
                         }
                         Insert(); //Insert tape into player
                     }
@@ -79,7 +79,7 @@ public class CassetteController : MonoBehaviour, IHoldable
                 else //Tape is not being held over recorder
                 {
                     //Triggers:
-                    if (inserted) Pop(); //Pop tape out of player
+                    if (inserted) Eject(); //Pop tape out of player
 
                     //Target Touch Position:
                     posTarget = Camera.main.ScreenToWorldPoint(new Vector3(holdingTouch.position.x, holdingTouch.position.y, heldPosition.position.z)); //Apply X and Y values of holding touch to target position
@@ -196,13 +196,14 @@ public class CassetteController : MonoBehaviour, IHoldable
         //Function: Inserts tape into cassette player
 
         //Handshake:
-        CPController.main.tape = this; //Indicate to player that this tape is now inserted
+        CPController.main.tape = this;    //Indicate to player that this tape is now inserted
+        CPController.main.SetTrackerUI(); //Update tracker UI on player
 
         //Cleanup:
         inserted = true; //Indicate that tape is now inserted
 
     }
-    public void Pop()
+    public void Eject()
     {
         //Function: Pops tape out of cassette player
 
@@ -212,7 +213,4 @@ public class CassetteController : MonoBehaviour, IHoldable
         //Cleanup:
         inserted = false; //Indicate that tape is no longer in player
     }
-
-    //Audio Methods:
-
 }
