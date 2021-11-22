@@ -262,7 +262,7 @@ public class CPController : MonoBehaviour
                 tape.audioSource.pitch = 1; //Reset playback speed
                 tape.audioSource.Pause();   //Pause clip at end
                 UnlockPlayButton();         //Unlock play button
-                recordLocked = false;       //Unlock record button
+                UnlockRecordButton();       //Unlock record button
             }
             else if (tape.audioSource.pitch < 0 && progress <= 0) //Tape has reached its beginning (while moving backward)
             {
@@ -273,7 +273,7 @@ public class CPController : MonoBehaviour
                 tape.audioSource.pitch = 1; //Reset playback speed
                 tape.audioSource.Stop();    //Stop clip at beginning
                 UnlockPlayButton();         //Unlock play button
-                recordLocked = false;       //Unlock record button
+                UnlockRecordButton();       //Unlock record button
             }
 
             //Update Tracker Bars (and Time Tick):
@@ -329,7 +329,15 @@ public class CPController : MonoBehaviour
 
         //Early Triggers:
         ButtonPlaySound(1, buttonClickSound);
-        if (!playing) return; //Ignore if tape is not already playing
+        if (tape.progress == 1) //Tape is at its end
+        {
+            tape.audioSource.Stop(); //Restart tape
+            tape.progress = 0;
+            ButtonPlaySound(1, buttonPressSound);
+            SetTrackerUI(); //Update UI
+            return;
+        }
+        else if (!playing) return; //Ignore if tape is not already playing
         ButtonPlaySound(1, buttonPressSound);
 
         //Decrease Speed:
