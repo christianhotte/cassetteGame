@@ -299,8 +299,8 @@ public class CPController : MonoBehaviour
         {
             if (tape.progress > 0) //Only play if tape is not in starting position
             {
-                playing = true; //Indicate that tape is now playing
                 tape.audioSource.UnPause(); //Un-pause tape
+                playing = true; //Indicate that tape is now playing
             }
             //NOTE: Does not play when tape is at 0 because tape cannot rewind
         }
@@ -332,7 +332,8 @@ public class CPController : MonoBehaviour
         tape.audioSource.Pause(); //Pause clip
 
         //Cleanup:
-        playing = false;
+        //tape.audioSource.pitch = 1; //Reset pitch
+        playing = false;            //Indicate that tape is no longer playing
     }
     public void OnFastForward()
     {
@@ -348,6 +349,7 @@ public class CPController : MonoBehaviour
             if (tape.progress == 1) return;                         //Ignore if tape is already at its end
             else if (tape.progress > 0) tape.audioSource.UnPause(); //Un-pause tape
             else tape.audioSource.Play();                           //Play tape
+            playing = true;                                         //Indicate that tape is now being played
         }
     }
     public void OnEject()
