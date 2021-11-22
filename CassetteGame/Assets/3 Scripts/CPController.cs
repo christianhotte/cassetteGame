@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class CPController : MonoBehaviour
 {
@@ -19,6 +20,9 @@ public class CPController : MonoBehaviour
     public RectTransform trackerBar;  //UI element representing tracker bar
     public RectTransform progressBar; //UI element representing progress of current tape
     public RectTransform recordBar;   //UI element representing current recorded area
+    public RectTransform timeTick;    //UI element representing tick where end of progress bar is
+    public TMP_Text namePlate;        //UI element for displaying inserted tape name
+    public TMP_Text timeStamp;        //UI element for displaying progression of time in clip
     private GameObject bounds;         //Player hitbox while stowed
     private GameObject deployedBounds; //Player hitbox while deployed
 
@@ -246,7 +250,7 @@ public class CPController : MonoBehaviour
                 tape.audioSource.Stop();    //Stop clip at beginning
             }
 
-            //Update Tracker Bars:
+            //Update Tracker Bars (and Time Tick):
             progressBar.sizeDelta = new Vector2(Mathf.Lerp(0, trackerBar.rect.width, progress), trackerBar.rect.height); //Set position of progress bar based on current progress through tape
             if (recording) //Player is currently recording
             {
@@ -256,6 +260,8 @@ public class CPController : MonoBehaviour
                 recordBar.sizeDelta = new Vector2(newWidth, trackerBar.rect.height);     //Set new width
             }
 
+            //Update Timestamp:
+            UpdateTimeStamp(); //Perform packaaged timestamp update calculation
         }
     }
 
@@ -384,6 +390,9 @@ public class CPController : MonoBehaviour
         //Update Progress Bar:
         progressBar.sizeDelta = new Vector2(Mathf.Lerp(0, trackerBar.rect.width, tape.progress), trackerBar.rect.height); //Set position of progress bar based on current progress through tape
 
+        //Initialize TimeStamp:
+        UpdateTimeStamp(); //Perform timestamp update function to initialize readout
+
         //Update Status Vars:
         recordStart = -1; //Clear recording data
         recordLength = 0; //Clear recording data
@@ -464,5 +473,29 @@ public class CPController : MonoBehaviour
 
         //Execute Release Triggers:
 
+    }
+
+    //Utility Methods:
+    public void UpdateTimeStamp()
+    {
+        //Function: Updates timestamp to match length and progress of inserted tape
+
+        //Update Tick Position:
+        Vector3 tickPosition = trackerBar.localPosition; //Reference local position of tracker bar
+        tickPosition.x = Mathf.Lerp(tickPosition.x, tickPosition.x + trackerBar.rect.width, tape.progress); //Find target location along tracker bar
+        timeTick.localPosition = tickPosition; //Set new position
+
+        //Update Text:
+        float progSecs = Mathf.RoundToInt(tape.audioSource.time);         //Get seconds progressed
+        float totalSecs = Mathf.RoundToInt(tape.audioSource.clip.length); //Get seconds in total clip
+        float progMins = progSecs / 60; progMins = (int)progMins;         //Get minutes from seconds
+        float totalMins = totalSecs / 60; totalMins = (int)totalMins;     //Get minutes from seconds
+        progSecs = progSecs % 60;   //Shave off seconds which were converted into minutes
+        totalSecs = totalSecs % 60; //Shave off seconds which were converted into minutes
+        string progSecString = ((int)progSecs).ToString();   //Get string for seconds progressed
+        string totalSecString = ((int)totalSecs).ToString(); //Get string for total seconds
+        if (progSecString.Length == 1) progSecString = "0" + ((int)progSecs).ToString();    //Add zero ahead of number if necessary
+        if (totalSecString.Length == 1) totalSecString = "0" + ((int)totalSecs).ToString(); //Add zero ahead of number if necessary
+        timeStamp.text = progMins.ToString() + ":" + progSecString + "/" + totalMins.ToString() + ":" + totalSecString; //Generate and set timeStamp text
     }
 }
