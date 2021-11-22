@@ -168,6 +168,7 @@ public class CassetteController : MonoBehaviour, IHoldable
 
         //Cleanup:
         posSnapped = false; //Unlock movement
+        TouchManager.inputManager.GetComponent<AudioSource>().Play();
     }
     public void Release()
     {
@@ -202,6 +203,8 @@ public class CassetteController : MonoBehaviour, IHoldable
         //Cleanup:
         inserted = true; //Indicate that tape is now inserted
 
+        //Triggers:
+        CPController.main.audioSource.PlayOneShot(CPController.main.tapeInsertSound); //Play insert sound
     }
     public void Eject()
     {
@@ -213,5 +216,8 @@ public class CassetteController : MonoBehaviour, IHoldable
 
         //Cleanup:
         inserted = false; //Indicate that tape is no longer in player
+
+        //Triggers:
+        CPController.main.audioSource.PlayOneShot(CPController.main.tapeEjectSound); //Play eject sound
     }
 }

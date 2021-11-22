@@ -139,5 +139,6 @@ public class WhiteBoard : MonoBehaviour
         {
             Destroy(newline); //Destroy existing line to prevent unsightly scribbles
         }
+        GetComponent<AudioSource>().Play();
     }
 }

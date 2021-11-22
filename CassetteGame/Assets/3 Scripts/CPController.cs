@@ -10,7 +10,7 @@ public class CPController : MonoBehaviour
     //Objects & Components:
     public static CPController main;  //Singleton instance of this script in scene
     internal CassetteController tape; //Tape currently in cassette player (if any)
-    private AudioSource audioSource;  //Audio source used to play sound effects
+    internal AudioSource audioSource; //Audio source used to play sound effects
 
     [Header("Player Components:")]
     public Transform model;     //Transform of model (which gets moved around and animated and stuff)
@@ -43,6 +43,13 @@ public class CPController : MonoBehaviour
     public AudioClip buttonPressSound;  //Sound made when player fully presses a button
     public AudioClip buttonLockSound;   //Sound made when player pushes a button which locks down
     public AudioClip buttonReturnSound; //Sound made when a button unlocks
+    [Space()]
+    public AudioClip doorOpenSound;   //Sound made when cassette door opens
+    public AudioClip doorCloseSound;  //Sound made when cassette door closes
+    public AudioClip tapeInsertSound; //Sound made when cassette tape is inserted
+    public AudioClip tapeEjectSound;  //Sound made when cassette tape is ejected
+    [Space()]
+    public AudioClip stowDeploySound; //Sound made when player is stowed or deployed
 
     //Settings:
     [Header("Settings:")]
@@ -476,6 +483,9 @@ public class CPController : MonoBehaviour
             bounds.SetActive(false);        //Disable normal bounds
             deployedBounds.SetActive(true); //Enable deployed bounds
         }
+
+        //Universal Triggers:
+        audioSource.PlayOneShot(stowDeploySound); //Play deployment sound
     }
     public void ToggleDoor(bool open)
     {
@@ -490,10 +500,11 @@ public class CPController : MonoBehaviour
         if (doorOpen) //Events which trigger upon door being opened
         {
             if (tape != null) tape.model.gameObject.SetActive(true); //Re-activate tape model
+            audioSource.PlayOneShot(doorOpenSound);
         }
         else //Events which trigger upon door being closed
         {
-
+            audioSource.PlayOneShot(doorCloseSound);
         }
     }
     public void ToggleButton(int buttonIndex, bool press)
