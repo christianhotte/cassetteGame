@@ -536,7 +536,7 @@ public class CPController : MonoBehaviour
         buttonPosSnapped[buttonIndex] = false;  //Unlock button animation
 
         //Execute Release Triggers:
-
+        if (buttonIndex == 0 && !recording) ButtonPlaySound(0, buttonReturnSound); //Play return sound when record button is returning from being locked
     }
 
     //Utility Methods:
@@ -588,6 +588,7 @@ public class CPController : MonoBehaviour
     {
         //Function: Does everything that needs to happen when play button is unlocked
 
+        if (playLocked) ButtonPlaySound(5, buttonReturnSound); //Play release sound (if button was locked)
         playLocked = false; //Disable play button lock
         buttonPosSnapped[2] = false; //Unsnap button position
     }
@@ -595,6 +596,7 @@ public class CPController : MonoBehaviour
     {
         //Function: Does everything that needs to happen when eject button is unlocked
 
+        if (ejectLocked) ButtonPlaySound(5, buttonReturnSound); //Play release sound (if button was locked)
         ejectLocked = false; //Disable eject button lock
         buttonPosSnapped[5] = false; //Unsnap button position
     }
