@@ -621,6 +621,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 52944c0266fed304b897e270e679796e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: f51fe88c92c22e842b9582c36bc37263, type: 2}
     - target: {fileID: 919132149155446097, guid: 52944c0266fed304b897e270e679796e, type: 3}
       propertyPath: m_Name
       value: CassetteButton (3)
@@ -1304,6 +1308,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 52944c0266fed304b897e270e679796e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 5f3edc7d26a4f764b8b85ab8d83cf7c3, type: 2}
     - target: {fileID: 919132149155446097, guid: 52944c0266fed304b897e270e679796e, type: 3}
       propertyPath: m_Name
       value: CassetteButton (2)
@@ -2343,6 +2351,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 52944c0266fed304b897e270e679796e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 161d584c3e57f4d4d9626a2dbd9137a0, type: 2}
     - target: {fileID: 919132149155446097, guid: 52944c0266fed304b897e270e679796e, type: 3}
       propertyPath: m_Name
       value: CassetteButton (4)
@@ -3289,6 +3301,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 52944c0266fed304b897e270e679796e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 57c203acd0b549244a2c515c5e7791ac, type: 2}
     - target: {fileID: 919132149155446097, guid: 52944c0266fed304b897e270e679796e, type: 3}
       propertyPath: m_Name
       value: CassetteButton (1)
