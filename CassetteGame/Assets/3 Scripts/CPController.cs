@@ -33,7 +33,16 @@ public class CPController : MonoBehaviour
     public Transform doorClosedPos;     //Position of cassette door when closed
     public Transform doorOpenPos;       //Position of cassette door when opened
     public float buttonPushDepth;       //How far buttons travel when pushed
+    public float buttonLockDepth;       //How far buttons should stick in when locked
     private Vector3[] buttonOriginPos = new Vector3[6]; //Local positions buttons start at
+
+    //Sounds:
+    [Header("Sounds:")]
+    public AudioClip buttonTouchSound;  //Sound made when player initially touches a button
+    public AudioClip buttonClickSound;  //Sound made when player fully presses a button and nothing happens
+    public AudioClip buttonPressSound;  //Sound made when player fully presses a button
+    public AudioClip buttonLockSound;   //Sound made when player pushes a button which locks down
+    public AudioClip buttonReturnSound; //Sound made when a button unlocks
 
     //Settings:
     [Header("Settings:")]
@@ -61,6 +70,10 @@ public class CPController : MonoBehaviour
     private bool recording = false;                //Whether or not player is currently recording clip from inserted tape
     private float recordStart = -1;                //Starting point of current record area (negative if NA)
     private float recordLength;                    //Length of current recorded area
+
+    private bool recordLocked; //Special button status, indicates that record button is locked down
+    private bool playLocked;   //Special button status, indicates that play button is locked down
+    private bool ejectLocked;  //Special button status, indicates that eject button is locked down
 
     //TEMP Debug Stuff:
     [Space()]
@@ -188,6 +201,13 @@ public class CPController : MonoBehaviour
                 targetPos.z -= buttonPushDepth; //Apply push depth to base position of button to get pushed position
                 lerpSpeed = buttonPressSpeed;   //Change lerp speed to press setting
             }
+            else if (i == 0 && recordLocked || //Special locked position for record button
+                     i == 2 && playLocked ||   //Special locked position for play button
+                     i == 5 && ejectLocked)    //Special locked position for eject button
+            {
+                targetPos.z -= buttonLockDepth; //Apply lock depth to base position of button to get locked position
+                lerpSpeed = buttonReleaseSpeed; //Get speed of lerp toward target (assume button is being released)
+            }
             lerpSpeed *= Time.deltaTime; //Apply deltaTime to lerp speed
 
             //Move Model:
@@ -238,16 +258,22 @@ public class CPController : MonoBehaviour
                 //End Trigger:
                 progress = 1;               //Lock progress to 0
                 playing = false;            //Indicate that tape is no longer being played
+                recording = false;          //Ensure player is no longer recording
                 tape.audioSource.pitch = 1; //Reset playback speed
                 tape.audioSource.Pause();   //Pause clip at end
+                UnlockPlayButton();         //Unlock play button
+                recordLocked = false;       //Unlock record button
             }
             else if (tape.audioSource.pitch < 0 && progress <= 0) //Tape has reached its beginning (while moving backward)
             {
                 //End (Beginning) Trigger:
                 progress = 0;               //Lock progress to 0
                 playing = false;            //Indicate that tape is no longer being played
+                recording = false;          //Ensure player is no longer recording
                 tape.audioSource.pitch = 1; //Reset playback speed
                 tape.audioSource.Stop();    //Stop clip at beginning
+                UnlockPlayButton();         //Unlock play button
+                recordLocked = false;       //Unlock record button
             }
 
             //Update Tracker Bars (and Time Tick):
@@ -276,6 +302,8 @@ public class CPController : MonoBehaviour
             //End Recording:
             recording = false; //Indicate that player is no longer recording
 
+            //Triggers:
+            UnlockRecordButton();
         }
         else //Player is not currently recording
         {
@@ -290,30 +318,30 @@ public class CPController : MonoBehaviour
             recordBar.localPosition = newPosition; //Move record bar to new position
             recordBar.sizeDelta = new Vector2(recordLength, trackerBar.rect.height); //Apply reset record bar length
             
+            //Triggers:
+            ButtonPlaySound(0, buttonLockSound);
+            recordLocked = true; //Lock down record button
         }
     }
     public void OnRewind()
     {
         //Function: Called when Rewind button is pressed
 
+        //Early Triggers:
+        ButtonPlaySound(1, buttonClickSound);
+        if (!playing) return; //Ignore if tape is not already playing
+        ButtonPlaySound(1, buttonPressSound);
+
         //Decrease Speed:
         if (tape.audioSource.pitch > 0) tape.audioSource.pitch = -1; //Reverse at normal speed if tape is already playing
         else tape.audioSource.pitch *= 2; //Double reverse speed if already reversing
-
-        //Play Clip:
-        if (!playing) //Tape is not already playing
-        {
-            if (tape.progress > 0) //Only play if tape is not in starting position
-            {
-                tape.audioSource.UnPause(); //Un-pause tape
-                playing = true; //Indicate that tape is now playing
-            }
-            //NOTE: Does not play when tape is at 0 because tape cannot rewind
-        }
     }
     public void OnPlay()
     {
         //Function: Called when Play button is pressed
+
+        //Early Triggers:
+        ButtonPlaySound(2, buttonClickSound); //Light click if player is already playing/can't play
 
         //Initialization:
         if (tape.progress == 1) return; //Ignore if player is at the end of the tape
@@ -326,37 +354,40 @@ public class CPController : MonoBehaviour
 
         //Cleanup:
         playing = true; //Indicate that player is now playing a tape
+
+        //Late Triggers:
+        ButtonPlaySound(2, buttonLockSound); //Button locks in if play has just begun
+        playLocked = true; //Indicate that play button is now locked down
     }
     public void OnPause()
     {
         //Function: Called when Pause button is pressed
 
-        //Initialization:
+        //Early Triggers:
+        ButtonPlaySound(3, buttonClickSound);
         if (!playing) return; //Ignore if player is not currently playing a tape
+        ButtonPlaySound(3, buttonPressSound);
 
         //Pause Clip:
         tape.audioSource.Pause(); //Pause clip
 
         //Cleanup:
         //tape.audioSource.pitch = 1; //Reset pitch
-        playing = false;            //Indicate that tape is no longer playing
+        playing = false; //Indicate that tape is no longer playing
+        UnlockPlayButton();
     }
     public void OnFastForward()
     {
         //Function: Called when FastForward button is pressed
 
+        //Early Triggers:
+        ButtonPlaySound(4, buttonClickSound);
+        if (!playing) return; //Ignore if tape is not currently being played
+        ButtonPlaySound(4, buttonPressSound);
+
         //Increase Speed:
         if (tape.audioSource.pitch < 0) tape.audioSource.pitch = 2; //Play at double speed if reversing currently
         tape.audioSource.pitch *= 2; //Double speed
-
-        //Play Clip:
-        if (!playing) //Tape is not already playing
-        {
-            if (tape.progress == 1) return;                         //Ignore if tape is already at its end
-            else if (tape.progress > 0) tape.audioSource.UnPause(); //Un-pause tape
-            else tape.audioSource.Play();                           //Play tape
-            playing = true;                                         //Indicate that tape is now being played
-        }
     }
     public void OnEject()
     {
@@ -376,6 +407,12 @@ public class CPController : MonoBehaviour
         //Ejection Procedure:
         ToggleDoor(true); //Pop door open
         ToggleStow(true); //Return player to table
+
+        //Triggers:
+        ButtonPlaySound(5, buttonLockSound);
+        ejectLocked = true; //Indicate that eject button is now locked down
+        UnlockRecordButton();
+        UnlockPlayButton();
     }
 
     //Interaction Methods:
@@ -401,6 +438,9 @@ public class CPController : MonoBehaviour
         //Update Status Vars:
         recordStart = -1; //Clear recording data
         recordLength = 0; //Clear recording data
+
+        //Release Eject Button:
+        if (tape != null) UnlockEjectButton(); //Special case for if eject button is locked and a new tape is inserted
     }
     public void ToggleStow(bool stow)
     {
@@ -465,7 +505,7 @@ public class CPController : MonoBehaviour
         buttonPosSnapped[buttonIndex] = false;  //Unlock button animation
 
         //Initial Button Press Triggers:
-
+        ButtonPlaySound(buttonIndex, buttonTouchSound); //Play touch sound on button
     }
     public void ReleaseButton(int buttonIndex)
     {
@@ -510,5 +550,33 @@ public class CPController : MonoBehaviour
         if (progSecString.Length == 1) progSecString = "0" + ((int)progSecs).ToString();    //Add zero ahead of number if necessary
         if (totalSecString.Length == 1) totalSecString = "0" + ((int)totalSecs).ToString(); //Add zero ahead of number if necessary
         timeStamp.text = progMins.ToString() + ":" + progSecString + "/" + totalMins.ToString() + ":" + totalSecString; //Generate and set timeStamp text
+    }
+    private void ButtonPlaySound(int index, AudioClip sound)
+    {
+        //Function: Plays given sound on given button
+
+        AudioSource source = buttons[index].GetComponent<AudioSource>(); //Get audio source from button
+        source.PlayOneShot(sound); //Play given sound
+    }
+    private void UnlockRecordButton()
+    {
+        //Function: Does everything that needs to happen when record button is unlocked
+
+        recordLocked = false; //Disable record button lock
+        buttonPosSnapped[0] = false; //Unsnap button position
+    }
+    private void UnlockPlayButton()
+    {
+        //Function: Does everything that needs to happen when play button is unlocked
+
+        playLocked = false; //Disable play button lock
+        buttonPosSnapped[2] = false; //Unsnap button position
+    }
+    private void UnlockEjectButton()
+    {
+        //Function: Does everything that needs to happen when eject button is unlocked
+
+        ejectLocked = false; //Disable eject button lock
+        buttonPosSnapped[5] = false; //Unsnap button position
     }
 }
